@@ -1,0 +1,130 @@
+---
+layout: post
+title:  "Kotlin Type System"
+date:   2015-04-18 08:43:59
+author: SimfleLipe
+categories: Kotlin
+tags: lorem
+---
+
+## 널 가능성
+
+널 가능성은 NullPointerException 오류를 피할 수 있게 돕기 위한 코틀린 타입 시스템의 특성이다.
+코틀린을 비롯한 최신 언어에서는 널에 대한 접근 방법은 가능한 한 이 문제를 실행 시점에서 컴파일 시점으로 옮기는 것이다.
+널이 될 수 있는지 여부를 타입 시스템에 추가함으로써 컴파일러가 여러 가지 오류를 컴파일 시 미리 감지해서 실행 시점에 발생 할 수 있는
+예외의 가능성을 줄일 수 있다.
+
+### 널이 될 수 있는 타입 : ?
+코틀린과 자바의 첫 번째이자 가장 중요한 차이는 코틀린 타입 시스템이 null 이 될 수 있는 타입을 명시적으로 지원한다는 점이다.
+
+{% highlight javascript %}
+/* 자바 */
+int strLen(String s) {
+  return s.length()
+}
+{% endhighlight %}
+
+위의 함수에 null 을 넘기면 NullPointerException이 발생 한다.
+
+이 함수를 코틀린으로 다시 작성 해보자.
+
+{% highlight javascript %}
+fun strLen(s:String) = s.length
+{% endhighlight %}
+
+코틀린에서 이런 함수를 작성 할 때 가장 먼저 답을 알아야 할 질문은 `이 함수가 널을 인자로 받을 수 있는가?`이다.
+null이 인자로 들어올 수 없다면 위와 같이 작성 할 수 있으며, 혹시 null 값을 넘기면 컴파일 시 오류가 발생한다.
+
+{% highlight javascript %}
+ERROR: Null can not be a value of a non-null type String
+{% endhighlight %}
+
+위의 함수가 널과 문자열을 인자로 받을 수 있게 하려면 타입 이름 뒤에 물음표(?)를 명시해야 한다.
+
+{% highlight javascript %}
+fun strLen(s:String?) = ...
+{% endhighlight %}
+
+널이 될 수 있는 타입의 변수가 있다면, 수행할 수 있는 연산이 제한된다.
+{% highlight javascript %}
+/* 메소드의 직접 호출이 제한된다. */
+fun strLen(s:String?) = s.length()
+
+ERROR: only safe(?.) or non-null asserted(!!.) ...
+{% endhighlight %}
+
+{% highlight javascript %}
+/* null이 될 수 있는 값을 널이 될 수 없는 타입의 변수에 대입할 수 없다.*/
+val x:String? = null
+val y:String = x
+ERROR: Type mismatch : inferred type is String? but String was expected
+{% endhighlight %}
+
+{% highlight javascript %}
+/* null 이 될수 있는 타입의 값을 null이 될수 없는 타입의 파리미터를 받는 함수에 전달 할 수 없다.*/
+strLen(x)
+ERROR: Type mismatch : inferred type is String? but String was expected
+{% endhighlight %}
+
+위와 같이 null 이 될 수 있는 타입은 많은 제약이 따른다. 이러한 제약을 피하려면 일단 null 과 비교하고 나면 컴파일러는 그 사실을
+기억하고 null이 아님이 확실한 영역에서는 해당값을 널이 될수 없는 타입의 값처럼 사용할 수 있다.
+
+{% highlight javascript %}
+/* null 이 될수 있는 타입의 값을 null이 될수 없는 타입의 파리미터를 받는 함수에 전달 할 수 없다.*/
+fun strLenSafe(s: String?) : Int = 
+    if (s!=null) s.length else 0
+{% endhighlight %}
+
+null 검사를 추가하면 코드가 컴파일 된다.
+
+### 안전한 호출 연산자 : ?.
+`안전한 호출 연산자 (?.)` 는 null 검사와 메소드 호출을 한 번의 연산으로 수행한다.
+예를 들어 `s?.toUpperCase()` 는 `if (s!=null) s.toUpperCase() else null` 과 같다.
+
+{% highlight javascript %}
+class Address(val country:String)
+class Company(val address:Address?)
+class Person(val company:Company?)
+
+fun Person.countryName() : String {
+    val country = this.company?.address?.country
+    return if (country !=null) country else "Unknown" //엘비스 연산(?:)으로 더욱 간결하게 표현 가능
+}
+{% endhighlight %}
+
+### 엘비스 연산자: ?:
+코틀린은 null 대신 사용할 디폴트 값을 지정할 때 편리하게 사용할 수 있는 연산자를 제공한다.
+그 연산자는 `엘비스(?:)` 연산자라고 한다.
+
+{% highlight javascript %}
+fun foo(s: String) {
+    val t:String = s ?: ""  //s가 null이면 결과는 빈문자열("")이다.
+}
+{% endhighlight %}
+
+`안전한 연산자(?.)` 에서 살표본 `Person.countryName 함수`를 좀더 간결하게 표현 할 수 있다.
+{% highlight javascript %}
+fun Person.countryName() = company?.address?.country ?: "Unknown"
+{% endhighlight %}
+
+### 안전한 캐스트: as?
+`as? 연산자`는 어떤 값을 지정한 타입으로 캐스트한다. `as?`는 값을 대상 타입으로 변환할 수 없으면 null을 반환한다.
+{% highlight javascript %}
+class castType(o:Any?) {
+    val other = o as? Person ?: return false
+    ...
+    ..
+}
+{% endhighlight %}
+
+### 널 아님 단언: !!
+`널 아님 단언 (!!)` 은 코틀린에서 널이 될 수 있는 타입의 값을 다룰 때 사용할 수 있는 도구이다.
+`널 아님 단언 (!!)` 을 사용하면 어떤 값이든 널이 될 수 없는 타입으로(강제로) 바꿀 수 있다.
+{% highlight javascript %}
+fun ignoreNulls(s: String?){
+    val sNotNull : String = s!!  //예외는 이 지점을 가르킨다.
+    println(sNotNull.length)
+} 
+{% endhighlight %}
+s가 null 이면 NullPointerException 이 발생한다. 특이한 점은 발생한 예외는 null 값을 사용하는 코드가 아니라
+`val sNotNull:String = s!!` 이 지점을 가르킨다.

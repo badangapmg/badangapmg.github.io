@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd" xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<url>
+<loc>http://localhost:4000/microservice/2015/04/18/spring-microservice-01.html</loc>
+<lastmod>2015-04-18T17:43:59+09:00</lastmod>
+</url>
+<url>
+<loc>http://localhost:4000/kotlin/2015/04/18/mongodb-01.html</loc>
+<lastmod>2015-04-18T17:43:59+09:00</lastmod>
+</url>
+<url>
+<loc>http://localhost:4000/kotlin/2015/04/18/kotlin-01.html</loc>
+<lastmod>2015-04-18T17:43:59+09:00</lastmod>
+</url>
+<url>
+<loc>http://localhost:4000/kafka/2015/04/18/kafka-01.html</loc>
+<lastmod>2015-04-18T17:43:59+09:00</lastmod>
+</url>
+<url>
+<loc>http://localhost:4000/jekyll/2015/04/18/welcome-to-jekyll.html</loc>
+<lastmod>2015-04-18T17:43:59+09:00</lastmod>
+</url>
+<url>
+<loc>http://localhost:4000/</loc>
+</url>
+<url>
+<loc>http://localhost:4000/posts/</loc>
+</url>
+</urlset>
